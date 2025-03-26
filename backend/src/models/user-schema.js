@@ -9,7 +9,11 @@ const userSchema = new mongoose.Schema({
     username: {
         type: String,
         required: [true, "Username is required"],
-        unique: true,
+    },
+    role:{
+        type: String,
+        enum: ["user", "admin"],
+        default: "user",
     },
     password: {
         type: String,
@@ -18,7 +22,7 @@ const userSchema = new mongoose.Schema({
     },
     profileImage: {
         type: String,
-        default: "default_profile.jpg",
+        default: "",
     },
 });
 
