@@ -7,10 +7,7 @@ const router= express.Router();
 
 router.post("/register",validateRequest(UserValidations.createUserValidationSchema),UserController.createUser);
 
-router.post("/login", async(req,res)=>{
-
-    // TODO: Implement login logic
-});
+router.post("/login", validateRequest(UserValidations.loginUserValidationSchema),UserController.loginUser);
 
 
 const userRoutes = router;
