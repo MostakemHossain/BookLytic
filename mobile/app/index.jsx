@@ -15,6 +15,9 @@ export default function Index() {
       <Link  href={"/(auth)/signup"}>
       SignUp
       </Link>
+      <Link  href={"/(auth)/signin"}>
+      Login
+      </Link>
     </View>
   );
 }
