@@ -1,3 +1,4 @@
+import bookRoutes from "../routers/book-routes.js";
 import userRoutes from "../routers/user-routes.js";
 import express from "express";
 
@@ -7,6 +8,10 @@ const moduleRoutes = [
       path: '/auth',
       route: userRoutes
     },
+    {
+      path: '/book',
+      route: bookRoutes
+    }
     
   ];
   
