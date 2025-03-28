@@ -52,9 +52,18 @@ const deleteBook=async(req)=>{
     const result= await Book.findByIdAndDelete(id);
     return result;
 }
+const getBookSpecificUser= async(req)=>{
+    
+    const books= await Book.find({user: req.user.id}).sort({
+        createdAt: -1,
+    });
+
+    return books;
+}
 
 export const BookServices={
     createBook,
     getBook,
     deleteBook,
+    getBookSpecificUser,
 }

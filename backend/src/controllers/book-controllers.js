@@ -28,10 +28,20 @@ const deleteBook = catchAsync(async(req,res)=>{
         message: "Book deleted successfully",
         data: result,
     })
+});
+const getBookSpecificUser = catchAsync(async(req,res)=>{
+    const result= await BookServices.getBookSpecificUser(req);
+    sendResponse(res,{
+        statusCode: 200,
+        success: true,
+        message: "Books fetched successfully",
+        data: result,
+    })
 })
 
 export const BookController ={
     createBook,
     getBook,
     deleteBook,
+    getBookSpecificUser,
 }
