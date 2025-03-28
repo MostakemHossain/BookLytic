@@ -14,6 +14,26 @@ const createBook= async (payload,userId)=>{
 
 };
 
+const getBook =async(req)=>{
+    const page= req.query.page || 1;
+    const limit= parseInt(req.query.limit) || 5;
+    const skip= (page-1)*limit;
+    const books= await Book.find({}).sort({
+        createdAt: -1,
+    }).skip(skip).limit(limit).populate('user','username profileImage');
+
+    const total=  await Book.countDocuments()
+
+    return {
+        books,
+        totalBooks:total,
+        currentPage: page,
+        totalPages: Math.ceil(total/limit),
+    };
+    
+}
+
 export const BookServices={
     createBook,
+    getBook,
 }

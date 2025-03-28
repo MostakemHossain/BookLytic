@@ -8,5 +8,7 @@ const router= express.Router();
 
 router.post("/create-book",validateRequest(BookValidations.createBookValidationSchema), auth('user'),BookController.createBook);
 
+router.get("/get-books", auth("user"),BookController.getBook);
+
 const bookRoutes = router;
 export default bookRoutes;
