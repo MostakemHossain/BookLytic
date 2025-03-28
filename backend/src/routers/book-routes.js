@@ -10,5 +10,7 @@ router.post("/create-book",validateRequest(BookValidations.createBookValidationS
 
 router.get("/get-books", auth("user"),BookController.getBook);
 
+router.delete("/delete-book/:id", auth("user"), BookController.deleteBook);
+
 const bookRoutes = router;
 export default bookRoutes;

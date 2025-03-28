@@ -1,5 +1,7 @@
+import AppError from "../error/AppError.js";
 import cloudinary from "../lib/cloudinary.js";
 import { Book } from "../models/book-schema.js";
+import httpStatus from 'http-status';
 
 
 const createBook= async (payload,userId)=>{
@@ -33,7 +35,26 @@ const getBook =async(req)=>{
     
 }
 
+const deleteBook=async(req)=>{
+    const {id}= req.params;
+    const isBookExists= await Book.findById(id);
+    if(!isBookExists){
+        throw new AppError(httpStatus.NOT_FOUND,'Book not found');
+    }
+    // check if the book own user
+    if(isBookExists.user.toString()!== req.user.id){
+        throw new AppError(httpStatus.FORBIDDEN,'You are not authorized to delete this book');
+    }
+    
+    await cloudinary.uploader.destroy(isBookExists.image);
+  
+
+    const result= await Book.findByIdAndDelete(id);
+    return result;
+}
+
 export const BookServices={
     createBook,
     getBook,
+    deleteBook,
 }
