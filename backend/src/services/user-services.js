@@ -14,7 +14,7 @@ const createUser= async(payload)=>{
     const avatar= `https://api.dicebear.com/9.x/adventurer/svg?seed=${payload.username}`;
 
     // hash the password
-    const hashedPassword= await bcrypt.hash(payload.password,10);
+    const hashedPassword= await bcrypt.hash(payload.password,6);
     // create a new user
     const user= new User({
         username: payload.username,
