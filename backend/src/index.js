@@ -15,6 +15,11 @@ app.use(cors());
 
 app.use("/api",router);
 
+router.get("/",
+    (req, res) => {
+        res.status(200).json({ message: "Welcome to the API" });
+    }
+)
 
 app.listen(config.port,()=>{
     console.log(`Server running on port ${config.port}`);
