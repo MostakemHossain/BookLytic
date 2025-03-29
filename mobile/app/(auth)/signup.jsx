@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import styles from "../../assets/styles/login.styles";
 import COLORS from '../../constants/colors';
 import { Link } from 'expo-router';
+import {useAuthStore} from '../../store/authStore';
 
 export default function SignUp() {
     const [username, setUsername] = useState("");
@@ -11,12 +12,19 @@ export default function SignUp() {
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
+    const {register,isLoading,user}= useAuthStore();
 
     const handleSignup = async () => {
         if (!username || !email || !password) {
             Alert.alert("Error", "All fields are required");
             return;
         }
+        const result= await register(username, email, password);
+        console.log(result);
+        if (!result.success) {
+            Alert.alert("Error", result.message);
+        }
+        Alert.alert("Success", "User registered successfully. You can now log in.");
 
     };
 
