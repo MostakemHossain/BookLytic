@@ -5,7 +5,6 @@ import httpStatus from 'http-status';
 
 
 const createBook= async (payload,userId)=>{
-    
     // upload image to cloudinary server
     const {secure_url: imageUrl}= await cloudinary.uploader.upload(payload.image);
 

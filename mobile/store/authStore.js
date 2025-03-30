@@ -65,6 +65,11 @@ export const useAuthStore = create((set) => ({
     try {
       await AsyncStorage.removeItem("token");
       await AsyncStorage.removeItem("user");
+      Alert.alert(
+        "Logout Successful",
+        "You have been logged out. You will be redirected to the login screen."
+      )
+    
       set({ token: null, user: null });
     } catch (error) {
       // Handle error
