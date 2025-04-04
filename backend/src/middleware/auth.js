@@ -8,11 +8,12 @@ const auth = (...roles) => {
   return async (req, res, next) => {
     try {
       const token = req.headers.authorization;
+    
       if (!token) {
         throw new AppError(httpStatus.BAD_REQUEST, "You are not authorized");
       }
-
-      const verifiedUser = await jwtHelpers.verifyToken(
+      console.log(token);
+      const verifiedUser =  jwtHelpers.verifyToken(
         token,
         config.jwt__access_secret
       );

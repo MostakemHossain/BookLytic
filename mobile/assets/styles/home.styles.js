@@ -27,6 +27,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
     color: COLORS.primary,
     marginBottom: 8,
+    marginTop: 4,
   },
   headerSubtitle: {
     fontSize: 14,

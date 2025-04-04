@@ -3,7 +3,6 @@ import catchAsync from "../shared/catch-async.js";
 import sendResponse from "../shared/send-response.js";
 
 const createBook = catchAsync(async(req,res)=>{
-    console.log(req.body);
     const result= await BookServices.createBook(req?.body,req?.user?.id);
     sendResponse(res,{
         statusCode: 201,
@@ -13,6 +12,7 @@ const createBook = catchAsync(async(req,res)=>{
     })
 });
 const getBook = catchAsync(async(req,res)=>{
+
     const result= await BookServices.getBook(req);
     sendResponse(res,{
         statusCode: 200,
