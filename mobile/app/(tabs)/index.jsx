@@ -1,19 +1,32 @@
-import { View, Text, TouchableOpacity, FlatList, ActivityIndicator } from "react-native";
+"use client";
+
+import {
+  View,
+  Text,
+  FlatList,
+  ActivityIndicator,
+  RefreshControl,
+} from "react-native";
 import { Image } from "expo-image";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuthStore } from "../../store/authStore";
 import styles from "../../assets/styles/home.styles";
 import { Ionicons } from "@expo/vector-icons";
 import COLORS from "../../constants/colors";
 import { formatPublishDate } from "../../lib/utils";
+import Loader from "../../components/Loader";
+
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export default function Home() {
-  const { token, logout } = useAuthStore();
+  const { token } = useAuthStore();
   const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [refreshing, setRefreshing] = useState(false);
   const [hasMore, setHasMore] = useState(true);
+
+  const API_BASE_URL = "http://localhost:3000";
 
   const fetchBooks = async (pageNum = 1, refresh = false) => {
     try {
@@ -21,45 +34,65 @@ export default function Home() {
         setRefreshing(true);
       } else if (pageNum === 1) {
         setLoading(true);
+      } else {
+        setLoading(true);
       }
 
+      console.log(`Fetching books for page ${pageNum}, refresh: ${refresh}`);
+
       const cleanToken = token?.replace(/^"(.*)"$/, "$1");
+      if (!cleanToken) {
+        console.warn("No token found. Skipping fetch.");
+        return;
+      }
 
       const response = await fetch(
-        `http://localhost:3000/api/book/get-books?page=${pageNum}`,
+        `${API_BASE_URL}/api/book/get-books?page=${pageNum}&limit=5`,
         {
           method: "GET",
           headers: {
             Authorization: cleanToken,
+            "Content-Type": "application/json",
           },
         }
       );
 
       const data = await response.json();
+      console.log("API Response:", {
+        status: response.status,
+        books: data.data?.books?.length || 0,
+        totalPages: data.totalPages,
+      });
 
       if (!response.ok) {
-        throw new Error("Failed to fetch books");
+        throw new Error(
+          `Failed to fetch books: ${data.message || response.statusText}`
+        );
       }
 
-      const newBooks = data.data.books || [];
+      const newBooks = data.data?.books || [];
 
-      const updatedBooks =
-        refresh || pageNum === 1
-          ? newBooks
-          : [
-              ...books,
-              ...newBooks.filter(
-                (newBook) => !books.some((book) => book._id === newBook._id)
-              ),
-            ];
+      setBooks((prevBooks) => {
+        if (refresh || pageNum === 1) return newBooks;
+        const uniqueBooks = newBooks.filter(
+          (newBook) => !prevBooks.some((book) => book._id === newBook._id)
+        );
 
-      setBooks(updatedBooks);
-      setHasMore(pageNum < data.totalPages);
+        console.log(
+          `Adding ${uniqueBooks.length} new books to existing ${prevBooks.length}`
+        );
+        return [...prevBooks, ...uniqueBooks];
+      });
+
+      setHasMore(
+        data.totalPages ? pageNum < data.totalPages : newBooks.length > 0
+      );
       setPage(pageNum);
     } catch (error) {
-      console.log(error.message);
+      console.error(error.message);
     } finally {
       if (refresh) {
+       await sleep(800);
         setRefreshing(false);
       } else {
         setLoading(false);
@@ -71,13 +104,23 @@ export default function Home() {
     fetchBooks(1);
   }, []);
 
+  if (loading) return <Loader />;
+
+  const handleLoadMore = async () => {
+    console.log("Load more triggered", { loading, refreshing, hasMore, page });
+    if (!loading && !refreshing && hasMore) {
+      sleep(1000);
+      await fetchBooks(page + 1);
+    }
+  };
+
   const renderRatingStars = (rating) => {
-    return Array.from({ length: Math.floor(rating) }, (_, i) => (
+    return Array.from({ length: 5 }, (_, i) => (
       <Ionicons
         key={i}
-        name="star"
+        name={i < Math.floor(rating) ? "star" : "star-outline"}
         size={20}
-        color={i < rating ? "#F4b400" : COLORS.textSecondary}
+        color={i < Math.floor(rating) ? "#F4b400" : COLORS.textSecondary}
       />
     ));
   };
@@ -85,28 +128,30 @@ export default function Home() {
   const renderItem = ({ item }) => (
     <View style={styles.bookCard}>
       <View style={styles.bookHeader}>
-        <View style={styles?.userInfo}>
+        <View style={styles.userInfo}>
           <Image
             source={{ uri: item?.user?.profileImage }}
             style={styles.avatar}
+            contentFit="cover"
           />
           <Text style={styles.username}>{item?.user?.username}</Text>
         </View>
       </View>
 
       <View style={styles.bookImageContainer}>
-        <Image source={{ uri: item?.image }} style={styles.bookImage} />
+        <Image
+          source={{ uri: item?.image }}
+          style={styles.bookImage}
+          contentFit="cover"
+        />
       </View>
 
       <View style={styles.bookDetails}>
         <Text style={styles.bookTitle}>{item?.title}</Text>
-
-        <Text style={styles.ratingContainer}>
+        <View style={styles.ratingContainer}>
           {renderRatingStars(item?.rating)}
-        </Text>
-
+        </View>
         <Text style={styles.caption}>{item?.caption}</Text>
-
         <Text style={styles.date}>
           Shared on {formatPublishDate(item.createdAt)}
         </Text>
@@ -119,42 +164,51 @@ export default function Home() {
       <FlatList
         data={books}
         renderItem={renderItem}
-        keyExtractor={(item, index) => `${item._id}_${index}`}
+        keyExtractor={(item) => item._id.toString()}
         contentContainerStyle={styles.listContainer}
         showsVerticalScrollIndicator={false}
         refreshing={refreshing}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={() => fetchBooks(1, true)}
+            colors={[COLORS.primary]}
+            tintColor={COLORS.primary}
+          />
+        }
         onRefresh={() => fetchBooks(1, true)}
-        onEndReached={() => {
-          if (hasMore && !loading) {
-            fetchBooks(page + 1);
-          }
-        }}
+        onEndReached={handleLoadMore}
+        onEndReachedThreshold={0.2}
         ListHeaderComponent={
           <View style={styles.header}>
             <Text style={styles.headerTitle}>📚 BookLytic 📗</Text>
             <Text style={styles.headerSubtitle}>
-              Discover great book from the community👇
+              Discover great books from the community 👇
             </Text>
-
           </View>
         }
         ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <Ionicons name="book-outline" size={60} color={COLORS.textSecondary}/>
-            <Text style={styles.emptyText}>
-              No recommendations yet.🥺
-            </Text>
-            <Text style={styles.emptySubtext}>
-              Be the first to share a Book!
-            </Text>
-
-          </View>
+          !loading ? (
+            <View style={styles.emptyContainer}>
+              <Ionicons
+                name="book-outline"
+                size={60}
+                color={COLORS.textSecondary}
+              />
+              <Text style={styles.emptyText}>No recommendations yet. 🥺</Text>
+              <Text style={styles.emptySubtext}>
+                Be the first to share a book!
+              </Text>
+            </View>
+          ) : null
         }
-       
         ListFooterComponent={
           loading ? (
             <View style={{ paddingVertical: 20 }}>
-              <ActivityIndicator size="large" color={COLORS.primary || "#4B7BE5"} />
+              <ActivityIndicator
+                size="large"
+                color={COLORS.primary || "#4B7BE5"}
+              />
             </View>
           ) : null
         }

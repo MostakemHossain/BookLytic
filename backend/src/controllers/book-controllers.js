@@ -12,7 +12,6 @@ const createBook = catchAsync(async(req,res)=>{
     })
 });
 const getBook = catchAsync(async(req,res)=>{
-
     const result= await BookServices.getBook(req);
     sendResponse(res,{
         statusCode: 200,
