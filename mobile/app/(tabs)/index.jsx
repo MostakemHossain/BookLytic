@@ -16,7 +16,7 @@ import COLORS from "../../constants/colors";
 import { formatPublishDate } from "../../lib/utils";
 import Loader from "../../components/Loader";
 
-const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+export const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export default function Home() {
   const { token } = useAuthStore();
@@ -38,8 +38,6 @@ export default function Home() {
         setLoading(true);
       }
 
-      console.log(`Fetching books for page ${pageNum}, refresh: ${refresh}`);
-
       const cleanToken = token?.replace(/^"(.*)"$/, "$1");
       if (!cleanToken) {
         console.warn("No token found. Skipping fetch.");
@@ -58,11 +56,6 @@ export default function Home() {
       );
 
       const data = await response.json();
-      console.log("API Response:", {
-        status: response.status,
-        books: data.data?.books?.length || 0,
-        totalPages: data.totalPages,
-      });
 
       if (!response.ok) {
         throw new Error(
@@ -78,9 +71,6 @@ export default function Home() {
           (newBook) => !prevBooks.some((book) => book._id === newBook._id)
         );
 
-        console.log(
-          `Adding ${uniqueBooks.length} new books to existing ${prevBooks.length}`
-        );
         return [...prevBooks, ...uniqueBooks];
       });
 
@@ -92,7 +82,7 @@ export default function Home() {
       console.error(error.message);
     } finally {
       if (refresh) {
-       await sleep(800);
+        await sleep(800);
         setRefreshing(false);
       } else {
         setLoading(false);
@@ -107,7 +97,6 @@ export default function Home() {
   if (loading) return <Loader />;
 
   const handleLoadMore = async () => {
-    console.log("Load more triggered", { loading, refreshing, hasMore, page });
     if (!loading && !refreshing && hasMore) {
       sleep(1000);
       await fetchBooks(page + 1);

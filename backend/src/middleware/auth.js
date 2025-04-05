@@ -12,7 +12,6 @@ const auth = (...roles) => {
       if (!token) {
         throw new AppError(httpStatus.BAD_REQUEST, "You are not authorized");
       }
-      console.log(token);
       const verifiedUser =  jwtHelpers.verifyToken(
         token,
         config.jwt__access_secret

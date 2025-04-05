@@ -16,3 +16,14 @@ export function formatPublishDate(dateString) {
   const year = date.getFullYear();
   return `${month} ${day},${year}`;
 }
+
+export const renderRatingStars = (rating) => {
+  return Array.from({ length: 5 }, (_, i) => (
+    <Ionicons
+      key={i}
+      name={i < Math.floor(rating) ? "star" : "star-outline"}
+      size={20}
+      color={i < Math.floor(rating) ? "#F4b400" : COLORS.textSecondary}
+    />
+  ));
+};
