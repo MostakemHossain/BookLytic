@@ -132,7 +132,7 @@ export default function SignUp() {
             <TouchableOpacity
               style={[styles.button, isLoading && styles.disabledButton]}
               onPress={handleSignup}
-              disabled={loading}
+              disabled={isLoading}
             >
               {isLoading ? (
                 <ActivityIndicator color="#fff" />

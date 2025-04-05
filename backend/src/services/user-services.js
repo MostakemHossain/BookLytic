@@ -37,6 +37,7 @@ const createUser= async(payload)=>{
     return {
         user,
         accessToken,
+        createdAt:user.createdAt,
     };
 
 }
@@ -63,6 +64,7 @@ const loginUser= async(payload)=>{
     return {
         user,
         accessToken,
+        createdAt:user.createdAt,
     };
 }
 export const UserServices= {
