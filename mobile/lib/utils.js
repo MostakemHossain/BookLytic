@@ -1,3 +1,6 @@
+import { Ionicons } from "@expo/vector-icons";
+import COLORS from "../constants/colors";
+
 export function formatMemberSince(dateString) {
   const date = new Date(dateString);
   const year = date.getFullYear();

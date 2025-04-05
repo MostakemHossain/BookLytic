@@ -48,13 +48,14 @@ export default function Profile() {
       });
 
       const data = await response.json();
+     
       if (!response.ok) {
         throw new Error(
           `Failed to fetch books: ${data.message || response.statusText}`
         );
       }
 
-      setBooks(data);
+      setBooks(data.data);
     } catch (error) {
       console.error(error.message);
     } finally {
@@ -120,6 +121,7 @@ export default function Profile() {
     );
   };
 
+  console.log(books.data)
   const renderBookItem = ({ item }) => (
     <View style={styles.bookItem}>
       <Image source={item.image} style={styles.bookImage} />
